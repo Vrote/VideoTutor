@@ -47,4 +47,5 @@ pnpm-debug.log*
 *.swp
 *.swo
 .DS_Store
-Thumbs.db
+# Local Documentation / Reports (Do not push)
+PROJECT_REPORT.md
