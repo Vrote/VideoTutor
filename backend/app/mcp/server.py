@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Dict, Any, List
 from backend.app.config import settings
-from backend.app.services.youtube import extract_video_id
+from backend.app.services.youtube import extract_video_id, validate_video_category
 from backend.app.services.transcript import get_video_transcript, chunk_transcript
 from backend.app.services.vector_store import (
     add_transcript_chunks,
@@ -53,6 +53,18 @@ def get_transcript_tool(video_url: str) -> Dict[str, Any]:
     """
     try:
         video_id = extract_video_id(video_url)
+
+        # Pre-validation: ensure video is educational/tutorial content
+        is_valid, category, msg = validate_video_category(video_url)
+        if not is_valid:
+            logger.warning(f"Rejected non-educational video '{video_url}' ({category}): {msg}")
+            return {
+                "success": False,
+                "error": msg,
+                "category": category,
+                "video_url": video_url,
+                "video_id": video_id
+            }
 
         raw_items = get_video_transcript(video_id)
 
