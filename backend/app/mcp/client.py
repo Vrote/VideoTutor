@@ -2,6 +2,7 @@ import logging
 from typing import List, Dict, Any, Callable
 from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
+from langsmith import traceable
 from backend.app.mcp.server import (
     get_video_info_tool,
     get_transcript_tool,
@@ -44,14 +45,20 @@ class MCPClient:
         self.tools_registry = tools_registry or MCP_TOOLS
 
     def execute_tool(self, tool_name: str, **kwargs) -> Dict[str, Any]:
-        """Execute an MCP tool by name with arguments."""
+        """Execute an MCP tool by name with arguments. Every call is traced in LangSmith."""
         if tool_name not in self.tools_registry:
             logger.error(f"Tool '{tool_name}' not found in MCP registry.")
             return {"success": False, "error": f"Tool '{tool_name}' not registered in MCP server."}
 
         logger.info(f"MCP Client executing tool '{tool_name}' with kwargs: {kwargs}")
+
+        # Wrap the actual call in a @traceable span named after the tool
+        @traceable(run_type="tool", name=f"mcp:{tool_name}")
+        def _traced_call(**kw):
+            return self.tools_registry[tool_name](**kw)
+
         try:
-            result = self.tools_registry[tool_name](**kwargs)
+            result = _traced_call(**kwargs)
             return result
         except Exception as e:
             logger.error(f"Error executing MCP tool '{tool_name}': {e}")

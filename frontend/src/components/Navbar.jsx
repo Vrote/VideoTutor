@@ -48,6 +48,14 @@ export default function Navbar({ currentUrl, onProcessVideo, isLoading, viewMode
         >
           Split View
         </button>
+        <button
+          type="button"
+          className={`tab-btn ${viewMode === 'observability' ? 'active' : ''}`}
+          onClick={() => onChangeViewMode('observability')}
+          style={{ position: 'relative' }}
+        >
+          Observability
+        </button>
       </div>
     </header>
   );

@@ -87,8 +87,8 @@ The user is watching a video lecture (ID: {video_id}) and sent this message:
 
 Analyze the user's intent and classify it into ONE of these 3 categories:
 1. "whole_video": The user's request requires synthesis across the entire lecture (e.g. generating a quiz, self-test, review questions, study notes, cheat sheet, overall summary, lecture timeline, main takeaways).
-2. "specific_search": The user is asking about a specific concept, term, topic, or factual question discussed in the video (e.g. "What is MCP?", "Explain client vs server", "Why is N x M bad?").
-3. "out_of_video": The user is asking about something completely unrelated to education or this video.
+2. "specific_search": The user is asking about a specific concept, term, topic, or factual question that might be taught in this video lecture (e.g. "What is MCP?", "Explain client vs server", "Why is N x M bad?").
+3. "out_of_video": The user is asking about general trivia, unrelated geography, unrelated politics, general knowledge, or topics completely detached from the video lecture (e.g. "what is capital of india", "who won the world cup", "how to bake a cake").
 
 If category is "specific_search", extract the concise 1-4 word search keyword, automatically fixing any user typos or spelling mistakes (e.g. "what is langavhin" -> "LangChain", "n x m complex" -> "N x M complexity", "context switch" -> "context switching").
 
@@ -175,10 +175,15 @@ INSTRUCTIONS:
    - **Key Takeaway**: 1-2 sentence core lesson for the student.
 """
 
-GENERAL_KNOWLEDGE_PROMPT = """You are an expert AI tutor. The user asked: '{user_request}'.
-This topic is NOT discussed in the loaded video lecture.
-1. Start by stating: ' **Note:** This topic is not covered in the loaded video. However, based on general knowledge:'
-2. Provide a clear, comprehensive explanation in 100% clean English without hallucinating video timestamps.
+GENERAL_KNOWLEDGE_PROMPT = """You are VideoTutor, an expert AI educational tutor. The user is watching a video lecture, but asked: '{user_request}'.
+This topic is NOT discussed or covered in the loaded video lecture.
+
+INSTRUCTIONS:
+1. Start your answer with:
+> **💡 Note:** This topic is not covered in the loaded video lecture. However, based on general knowledge:
+
+2. Directly, accurately, and thoroughly answer the student's question in 100% clean English.
+3. Do NOT make up fake timestamps or attempt to force irrelevant video analogies.
 """
 
 NOTES_REVISION_PROMPT = """You are VideoTutor, an expert AI Learning Tutor revising educational study notes.

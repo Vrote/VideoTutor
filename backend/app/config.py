@@ -23,8 +23,13 @@ class Settings(BaseSettings):
 
     CHROMA_PERSIST_DIRECTORY: str = "../chroma_data"
 
-    
     SEARCH_RELEVANCE_THRESHOLD: float = 1.65
+
+   
+    LANGCHAIN_TRACING_V2: str = "false"
+    LANGCHAIN_ENDPOINT: str = "https://apac.api.smith.langchain.com"
+    LANGCHAIN_API_KEY: str = ""
+    LANGCHAIN_PROJECT: str = "VideoTutor"
 
     model_config = SettingsConfigDict(
         env_file=(
@@ -38,3 +43,10 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Push LangSmith variables into os.environ so LangChain SDK can read them
+if settings.LANGCHAIN_API_KEY:
+    os.environ["LANGCHAIN_TRACING_V2"] = settings.LANGCHAIN_TRACING_V2
+    os.environ["LANGCHAIN_ENDPOINT"] = settings.LANGCHAIN_ENDPOINT
+    os.environ["LANGCHAIN_API_KEY"] = settings.LANGCHAIN_API_KEY
+    os.environ["LANGCHAIN_PROJECT"] = settings.LANGCHAIN_PROJECT

@@ -51,10 +51,14 @@ class ChatResponse(BaseModel):
 class NotesApproveRequest(BaseModel):
     """Request payload for approving generated notes in Human-in-the-Loop workflow."""
     thread_id: str = Field(..., json_schema_extra={"example": "default_thread"})
+    draft_notes: Optional[str] = None
+    video_id: Optional[str] = None
 
 
 class NotesReviseRequest(BaseModel):
     """Request payload for requesting modifications to generated notes."""
     thread_id: str = Field(..., json_schema_extra={"example": "default_thread"})
     feedback: str = Field(..., json_schema_extra={"example": "Make the notes shorter and add two key examples."})
+    draft_notes: Optional[str] = None
+    video_id: Optional[str] = None
 

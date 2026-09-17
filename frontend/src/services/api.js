@@ -44,14 +44,18 @@ export async function sendChatMessage(videoId, message, threadId = 'default_thre
   return data;
 }
 
-export async function approveNotes(threadId) {
+export async function approveNotes(threadId, draftNotes = null, videoId = null) {
   const response = await fetch(`${API_BASE_URL}/notes/approve`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    body: JSON.stringify({ thread_id: threadId })
+    body: JSON.stringify({
+      thread_id: threadId,
+      draft_notes: draftNotes,
+      video_id: videoId
+    })
   });
 
   const data = await response.json();
@@ -61,7 +65,7 @@ export async function approveNotes(threadId) {
   return data;
 }
 
-export async function reviseNotes(threadId, feedback) {
+export async function reviseNotes(threadId, feedback, draftNotes = null, videoId = null) {
   const response = await fetch(`${API_BASE_URL}/notes/revise`, {
     method: 'POST',
     headers: {
@@ -70,7 +74,9 @@ export async function reviseNotes(threadId, feedback) {
     },
     body: JSON.stringify({
       thread_id: threadId,
-      feedback: feedback
+      feedback: feedback,
+      draft_notes: draftNotes,
+      video_id: videoId
     })
   });
 

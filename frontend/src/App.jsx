@@ -4,6 +4,7 @@ import VideoPlayer from './components/VideoPlayer';
 import NotesPanel from './components/NotesPanel';
 import ChatPanel from './components/ChatPanel';
 import RevisionModal from './components/RevisionModal';
+import ObservabilityView from '../../observability/ObservabilityView';
 import { processVideo, sendChatMessage, approveNotes, reviseNotes } from './services/api';
 
 export default function App() {
@@ -70,7 +71,7 @@ export default function App() {
   const handleApprove = async () => {
     setIsProcessing(true);
     try {
-      const data = await approveNotes(threadId);
+      const data = await approveNotes(threadId, notes, videoId);
       setRequiresApproval(false);
       if (data.draft_notes) setNotes(data.draft_notes);
       setMessages((prev) => [...prev, { role: 'agent', content: 'Study notes approved.' }]);
@@ -84,7 +85,7 @@ export default function App() {
   const handleRevise = async (feedback) => {
     setIsProcessing(true);
     try {
-      const data = await reviseNotes(threadId, feedback);
+      const data = await reviseNotes(threadId, feedback, notes, videoId);
       setIsRevisionOpen(false);
       setRequiresApproval(true);
       if (data.draft_notes) setNotes(data.draft_notes);
@@ -212,6 +213,11 @@ export default function App() {
               />
             </aside>
           </>
+        )}
+
+        {/* Mode 4: Observability & Monitoring Dashboard */}
+        {viewMode === 'observability' && (
+          <ObservabilityView />
         )}
       </main>
 

@@ -6,6 +6,7 @@ import chromadb
 from chromadb.config import Settings as ChromaSettings
 from backend.app.config import settings
 from backend.app.services.youtube import extract_video_id
+from langsmith import traceable
 
 logger = logging.getLogger("VideoTutor.VectorStore")
 
@@ -249,6 +250,7 @@ def is_video_processed(video_id: str) -> bool:
         return False
 
 
+@traceable(run_type="tool")
 def add_transcript_chunks(video_id: str, chunks: List[Dict[str, Any]]) -> int:
     """Add transcript chunks into persistent ChromaDB store.
 
@@ -317,6 +319,7 @@ def add_transcript_chunks(video_id: str, chunks: List[Dict[str, Any]]) -> int:
         return len(ids)
 
 
+@traceable(run_type="retriever")
 def search_transcript(video_id: str, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
     """Perform semantic similarity search over stored transcript chunks for a video.
 
@@ -385,6 +388,7 @@ def search_transcript(video_id: str, query: str, top_k: int = 5) -> List[Dict[st
     return formatted_results
 
 
+@traceable(run_type="retriever")
 def get_all_transcript_chunks(video_id: str) -> List[Dict[str, Any]]:
     """Retrieve all indexed chunks for a video, sorted chronologically from start to end.
 

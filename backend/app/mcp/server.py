@@ -115,21 +115,47 @@ def search_transcript_tool(video_id: str, query: str, top_k: int = 5) -> Dict[st
 
         results = db_search_transcript(clean_vid, query, top_k=top_k)
 
-        has_relevant_match = len(results) > 0
-        if results and results[0].get("distance") is not None:
-            top_dist = results[0].get("distance")
-            # Use the configurable threshold from settings (SEARCH_RELEVANCE_THRESHOLD).
-            # Default: 1.4 suits SentenceTransformer L2 distances.
-            # Tune higher in .env if using the lightweight hash fallback.
-            has_relevant_match = top_dist < settings.SEARCH_RELEVANCE_THRESHOLD
+        has_relevant_match = False
+        if results:
+            top_dist = results[0].get("distance", 999.0)
+
+            stopwords = {
+                "what", "when", "where", "which", "who", "whom", "this", "that", "these", "those",
+                "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had",
+                "do", "does", "did", "the", "a", "an", "and", "or", "but", "in", "on", "at",
+                "to", "for", "with", "about", "against", "between", "into", "through", "during",
+                "before", "after", "above", "below", "from", "up", "down", "out", "off", "over",
+                "under", "again", "further", "then", "once", "here", "there", "why", "how", "all",
+                "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor",
+                "not", "only", "own", "same", "so", "than", "too", "very", "can", "will", "just",
+                "should", "now", "video", "explain", "tell", "give", "please", "meaning", "concept"
+            }
+            raw_tokens = [w.lower().strip(".,!?;:()[]{}\"'") for w in query.split()]
+            meaningful_keywords = [w for w in raw_tokens if len(w) >= 2 and w not in stopwords]
+
+            has_keyword_match = False
+            for r in results[:top_k]:
+                chunk_text_lower = r.get("text", "").lower()
+                for kw in meaningful_keywords:
+                    if kw in chunk_text_lower:
+                        has_keyword_match = True
+                        break
+                if has_keyword_match:
+                    break
+
+            # If we found an exact keyword match, OR the mathematical vector distance is good, trust the database.
+            if has_keyword_match or top_dist < settings.SEARCH_RELEVANCE_THRESHOLD:
+                has_relevant_match = True
+            else:
+                has_relevant_match = False
 
         return {
             "success": True,
             "video_id": clean_vid,
             "query": query,
-            "results_count": len(results),
+            "results_count": len(results) if has_relevant_match else 0,
             "relevant_match_found": has_relevant_match,
-            "results": results,
+            "results": results if has_relevant_match else [],
             "message": "Relevant transcript chunks found." if has_relevant_match else f"No relevant discussion about '{query}' found in this video's transcript."
         }
     except Exception as e:

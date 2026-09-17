@@ -18,3 +18,18 @@ class AgentState(TypedDict):
     human_feedback: Optional[str]
     requires_human_approval: bool
     final_response: Optional[str]
+
+    
+    prompt_sent: Optional[str]
+    intent: Optional[str]
+    search_query: Optional[str]
+    llm_latency_ms: Optional[float]
+    intent_latency_ms: Optional[float]
+    tool_latency_ms: Optional[float]
+    token_usage: Optional[Dict[str, int]]
+    active_model: Optional[str]
+    notes_created_at: Optional[float]
+    executed_tools: Optional[List[Dict[str, Any]]]
+    guardrail_status: Optional[Dict[str, Any]]
+    eval_scorecard: Optional[Dict[str, Any]]
+    is_blocked: Optional[bool]

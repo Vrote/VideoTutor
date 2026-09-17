@@ -1,12 +1,14 @@
 import re
 import logging
 from urllib.parse import parse_qs, urlparse
+from langsmith import traceable
 
 logger = logging.getLogger("VideoTutor.YouTube")
 
 YOUTUBE_ID_REGEX = re.compile(r"^[a-zA-Z0-9_-]{11}$")
 
 
+@traceable(run_type="tool")
 def extract_video_id(url: str) -> str:
     """Extract and validate the 11-character YouTube video ID from various URL formats.
 
@@ -99,6 +101,7 @@ EDUCATIONAL_KEYWORDS = [
 ]
 
 
+@traceable(run_type="tool")
 def validate_video_category(video_url: str) -> tuple[bool, str, str]:
     """Validate whether a YouTube video belongs to an educational category using yt-dlp.
 
